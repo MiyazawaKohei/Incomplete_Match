@@ -93,11 +93,16 @@ vector<int> Create_Random_Permutaiton(int n_b){
 
 vector<double*> Init_Vectors_inA(vector<double*> B,vector<vector<double>> rotation, vector<int> permutation,int n_a){
 	vector<double*> A;
+	uniform_real_distribution<double> coordinate(0,1.0);
+	random_device rd;
+	std::mt19937 mt(rd());
+	double coordinates[dimention];
+	for(int i=0; i<dimention; i++) coordinates[i]=coordinate(mt);
 	for (int i=0; i<n_a; i++){
 		A.push_back(new double [dimention]);
 		int sigma_i=permutation[i];
 		for(int j=0; j<dimention; j++){
-			A.back()[j]=0;
+			A.back()[j]=coordinates[j];
 			for(int k=0; k<dimention; k++) A.back()[j]+=rotation[k][j]*B[sigma_i][k];
 			cout<<A.back()[j];
 		}
@@ -111,7 +116,7 @@ int main(){
 	vector<double*> A,B;
 	int n_a, n_b; //The number of the vectors of A, B
 	n_a=5;
-	n_b=5;
+	n_b=50;
 	B=Init_Vectors_inB(n_b);
 	for(int i=0; i<n_b;i++)		cout<<B[i][0]<<","<<B[i][1]<<","<<B[i][2]<<endl;
 	//Create_Random_Normarized_Vector();
