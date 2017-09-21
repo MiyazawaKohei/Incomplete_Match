@@ -43,8 +43,8 @@ vector<double> Create_Random_Normarized_Vector(){
 	Normarized_Vector.push_back(cos(theta)*cos(phi));
 	Normarized_Vector.push_back(cos(theta)*sin(phi));
 	Normarized_Vector.push_back(sin(theta));
-	for(int i=0; i<3;i++)	cout<<Normarized_Vector[i];
-	cout <<endl;
+	//for(int i=0; i<3;i++)	cout<<Normarized_Vector[i];
+	//cout <<endl;
 	return Normarized_Vector;
 }
 
@@ -75,21 +75,37 @@ vector<vector<double>> Create_Random_Rotation_Matrix(){
 	return vectors;
 }
 
+int MyRandom_Int(int i){
+	uniform_int_distribution<int> rand_int(0,i-1);
+	random_device rd;
+	std::mt19937 mt(rd());
+	return (rand_int(mt));
+}
+
+vector<int> Create_Random_Permutaiton(int n_b){
+	vector<int> permutation;
+	for(int i=0; i<n_b; i++)	permutation.push_back(i);
+	random_shuffle(permutation.begin(),permutation.end(),MyRandom_Int);
+	for(int i=0; i<n_b; i++)	cout<<permutation[i]<<' ';
+	cout<<endl;
+	return permutation;
+}
+
 int main(){
 
 	vector<double*> A,B;
 	int n_a, n_b; //The number of the vectors of A, B
-
-	B=Init_Vectors_inB(5);
-	for(int i=0; i<5;i++)		cout<<B[i][0]<<","<<B[i][1]<<","<<B[i][2]<<endl;
+	n_b=5;
+	B=Init_Vectors_inB(n_b);
+	//for(int i=0; i<n_b;i++)		cout<<B[i][0]<<","<<B[i][1]<<","<<B[i][2]<<endl;
 	//Create_Random_Normarized_Vector();
 	vector<vector<double>> vectors=Create_Random_Rotation_Matrix();
-	for(int i=0; i<3; i++){
+	/*for(int i=0; i<3; i++){
 		for(int j=0; j<3; j++){
 			cout<<vectors[i][j];
 		}
 		cout<<endl;
-	}
-	
+	}*/
+	Create_Random_Permutaiton(n_b);
 	Close_Vectors_inB(B);
 }
