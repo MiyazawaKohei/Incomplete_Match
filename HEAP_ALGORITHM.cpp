@@ -55,10 +55,10 @@ double L2_Norm(vector<double> v){
 	return norm;
 }
 
-void Normarize_Vector(vector<double> v){
+vector<double> Normarize_Vector(vector<double> v){
 	double norm=L2_Norm(v);
 	for(int i=0; i<v.size(); i++)	v[i]/=norm;
-	return;
+	return v;
 }
 
 double Inner_Product(vector<double> u,vector<double> v){
@@ -71,13 +71,17 @@ vector<vector<double>> Create_Random_Rotation_Matrix(){
 	vector<vector<double>> vectors;
 	double innerproduct;
 	for(int i=0; i<3; i++)		vectors.push_back(Create_Random_Normarized_Vector());
+	cout<<"rotation:"<<endl;
 	for(int i=0; i<3; i++){
 		for(int j=0; j<i; j++){
 			innerproduct=Inner_Product(vectors[i],vectors[j]);
 			for(int k=0; k<vectors[i].size(); k++) vectors[i][k]-=vectors[j][k]*innerproduct;	
 		}
-		Normarize_Vector(vectors[i]);
+		cout<<vectors[i][0]<<vectors[i][1]<<vectors[i][2]<<endl;
+		vectors[i]=Normarize_Vector(vectors[i]);
+		cout<<vectors[i][0]<<vectors[i][1]<<vectors[i][2]<<endl;
 	}	
+
 	return vectors;
 }
 
@@ -106,11 +110,14 @@ vector<double*> Init_Vectors_inA(vector<double*> B,vector<vector<double>> rotati
 	for(int i=0; i<dimention; i++) coordinates[i]=coordinate(mt);
 	for (int i=0; i<n_a; i++){
 		A.push_back(new double [dimention]);
-		int sigma_i=permutation[i];
 		for(int j=0; j<dimention; j++){
-			A.back()[j]=coordinates[j];
-			for(int k=0; k<dimention; k++) A.back()[j]+=rotation[k][j]*B[sigma_i][k];
-			cout<<A.back()[j];
+			A.back()[j]=coordinates[j];			
+
+			for(int k=0; k<dimention; k++){
+				A.back()[j]+=rotation[k][j]*B[permutation[i]][k];
+				cout<<rotation[k][j]<<B[permutation[i]][k]<<endl;
+			}
+			cout<<A.back()[j]<<endl;
 		}
 		cout<<endl;
 	}
@@ -181,7 +188,18 @@ int main(){
 	for(int i=0; i<n_b;i++)		cout<<B[i][0]<<","<<B[i][1]<<","<<B[i][2]<<endl;
 	vector<vector<double>> rotation=Create_Random_Rotation_Matrix();
 	vector<int> permutation=Create_Random_Permutaiton(n_b);
+	
+	/*for(int i=0; i<n_b; i++)	permutation[i]=i;
+	for(int i=0; i<3; i++){
+		for(int j=0; j<3; j++){
+			rotation[i][j]=(i==j?1:0);
+			cout<<rotation[i][j];
+		}
+		cout<<endl;
+
+	}*/
 	A=Init_Vectors_inA(B,rotation,permutation,n_a);
+	
 	Minimize_RMSD(A,B,permutation);
 	Close_Vectors(A);
 	Close_Vectors(B);
