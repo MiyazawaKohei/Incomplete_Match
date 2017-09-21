@@ -24,7 +24,7 @@ vector<double*> Init_Vectors_inB(int n_b){
 	return B;
 }
 
-void Close_Vectors_inB(vector<double*> B){
+void Close_Vectors(vector<double*> B){
 	while(B.size()>0){
 		delete[] B.back();
 		B.pop_back();
@@ -91,21 +91,39 @@ vector<int> Create_Random_Permutaiton(int n_b){
 	return permutation;
 }
 
+vector<double*> Init_Vectors_inA(vector<double*> B,vector<vector<double>> rotation, vector<int> permutation,int n_a){
+	vector<double*> A;
+	for (int i=0; i<n_a; i++){
+		A.push_back(new double [dimention]);
+		int sigma_i=permutation[i];
+		for(int j=0; j<dimention; j++){
+			A.back()[j]=0;
+			for(int k=0; k<dimention; k++) A.back()[j]+=rotation[k][j]*B[sigma_i][k];
+			cout<<A.back()[j];
+		}
+		cout<<endl;
+	}
+	return A;
+}
+
 int main(){
 
 	vector<double*> A,B;
 	int n_a, n_b; //The number of the vectors of A, B
+	n_a=5;
 	n_b=5;
 	B=Init_Vectors_inB(n_b);
-	//for(int i=0; i<n_b;i++)		cout<<B[i][0]<<","<<B[i][1]<<","<<B[i][2]<<endl;
+	for(int i=0; i<n_b;i++)		cout<<B[i][0]<<","<<B[i][1]<<","<<B[i][2]<<endl;
 	//Create_Random_Normarized_Vector();
-	vector<vector<double>> vectors=Create_Random_Rotation_Matrix();
+	vector<vector<double>> rotation=Create_Random_Rotation_Matrix();
 	/*for(int i=0; i<3; i++){
 		for(int j=0; j<3; j++){
 			cout<<vectors[i][j];
 		}
 		cout<<endl;
 	}*/
-	Create_Random_Permutaiton(n_b);
-	Close_Vectors_inB(B);
+	vector<int> permutation=Create_Random_Permutaiton(n_b);
+	Init_Vectors_inA(B,rotation,permutation,n_a);
+	Close_Vectors(A);
+	Close_Vectors(B);
 }
