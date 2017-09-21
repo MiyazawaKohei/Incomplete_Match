@@ -48,9 +48,14 @@ vector<double> Create_Random_Normarized_Vector(){
 	return Normarized_Vector;
 }
 
-void Normarize_Vector(vector<double> v){
-	double norm;
+double L2_Norm(vector<double> v){
+	double norm=0;
 	for(int i=0; i<v.size(); i++)	norm+=v[i]*v[i];
+	return norm;
+}
+
+void Normarize_Vector(vector<double> v){
+	double norm=L2_Norm(v);
 	for(int i=0; i<v.size(); i++)	v[i]/=pow(norm,0.5);
 	return;
 }
@@ -111,24 +116,65 @@ vector<double*> Init_Vectors_inA(vector<double*> B,vector<vector<double>> rotati
 	return A;
 }
 
+void Fix_Gravity_Point_to_Origin(vector<double*> vectors){
+	vector<double*> newvectors;
+	double gravity_point[dimention];
+	for(int i=0; i<dimention; i++){
+		gravity_point[i]=0;
+		for(int j=0; j<vectors.size(); j++) gravity_point[i]+=vectors[j][i];
+		gravity_point[i]/=vectors.size();
+		for(int j=0; j<vectors.size(); j++) vectors[j][i]-=gravity_point[i];
+	}
+	return;
+}
+
+Eigen::Matrix<double,3,3> Compute_BAt(const vector<double*> A,const vector<double*> B){
+	Eigen::Matrix<double,3,3> BAt;
+	for(int i=0; i<dimention; i++){
+		for(int j=0; j<dimention; j++){
+			BAt(i,j)=0;
+			for(int k=0; k<A.size(); k++)		BAt(i,j)+=A[k][j]*B[k][i];
+		}
+	}
+	cout<<BAt<<endl;
+	return BAt;
+}
+
+double Maximize_trRBAt(const vector<double*> A,const vector<double*> B){
+	Eigen::Matrix<double,3,3> BAt=Compute_BAt(A,B);
+	Eigen::JacobiSVD<Eigen::Matrix<double,3,3>> svd(BAt, Eigen::ComputeFullU | Eigen::ComputeFullV);
+	cout<<"Its singular values are:" <<svd.singularValues()<<endl;
+	double nuclear_norm=0;
+	for(int i=0; i<3; i++)		nuclear_norm+=svd.singularValues()[i];
+	cout<<nuclear_norm<<endl;
+	return nuclear_norm;
+}
+
+double Minimize_RMSD(const vector<double*> A,const vector<double*> B, const vector<int> sigma_i){
+	vector<double*> subA,subB;
+	for (int i=0; i<sigma_i.size(); i++){
+		subA.push_back(new double [dimention]);
+		for(int j=0; j<dimention; j++)		subA.back()[j]=A[i][j];
+		subB.push_back(new double [dimention]);
+		for(int j=0; j<dimention; j++)		subB.back()[j]=B[sigma_i[i]][j];
+	}
+	Fix_Gravity_Point_to_Origin(subA);
+	Fix_Gravity_Point_to_Origin(subB);
+	Maximize_trRBAt(subA,subB);
+}
+
 int main(){
 
 	vector<double*> A,B;
 	int n_a, n_b; //The number of the vectors of A, B
 	n_a=5;
-	n_b=50;
+	n_b=5;
 	B=Init_Vectors_inB(n_b);
 	for(int i=0; i<n_b;i++)		cout<<B[i][0]<<","<<B[i][1]<<","<<B[i][2]<<endl;
-	//Create_Random_Normarized_Vector();
 	vector<vector<double>> rotation=Create_Random_Rotation_Matrix();
-	/*for(int i=0; i<3; i++){
-		for(int j=0; j<3; j++){
-			cout<<vectors[i][j];
-		}
-		cout<<endl;
-	}*/
 	vector<int> permutation=Create_Random_Permutaiton(n_b);
-	Init_Vectors_inA(B,rotation,permutation,n_a);
+	A=Init_Vectors_inA(B,rotation,permutation,n_a);
+	Minimize_RMSD(A,B,permutation);
 	Close_Vectors(A);
 	Close_Vectors(B);
 }
