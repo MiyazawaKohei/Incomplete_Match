@@ -51,12 +51,13 @@ vector<double> Create_Random_Normarized_Vector(){
 double L2_Norm(vector<double> v){
 	double norm=0;
 	for(int i=0; i<v.size(); i++)	norm+=v[i]*v[i];
+	norm=pow(norm,0.5);
 	return norm;
 }
 
 void Normarize_Vector(vector<double> v){
 	double norm=L2_Norm(v);
-	for(int i=0; i<v.size(); i++)	v[i]/=pow(norm,0.5);
+	for(int i=0; i<v.size(); i++)	v[i]/=norm;
 	return;
 }
 
@@ -160,7 +161,14 @@ double Minimize_RMSD(const vector<double*> A,const vector<double*> B, const vect
 	}
 	Fix_Gravity_Point_to_Origin(subA);
 	Fix_Gravity_Point_to_Origin(subB);
-	Maximize_trRBAt(subA,subB);
+	
+	double RMSD=0;
+	for (int i=0; i<sigma_i.size(); i++){
+		for(int j=0; j<dimention; j++) RMSD+=subA[i][j]*subA[i][j]+subB[i][j]*subB[i][j];
+	}
+	RMSD-=2*Maximize_trRBAt(subA,subB);
+	cout<<"RMSD="<<RMSD<<endl;
+	return RMSD;
 }
 
 int main(){
