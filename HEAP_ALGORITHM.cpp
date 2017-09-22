@@ -200,7 +200,7 @@ HEAP* BUILD_HEAP_FOR_PAIRS(const vector<double*> A, const vector<double*> B){
 			sigma_i[0] = i;
 			sigma_i[1] = j;
 			RMSD = Minimize_RMSD(A,B,sigma_i);
-			//cout<<i<<','<<j<<"RMSD="<<RMSD<<endl;
+			cout<<i<<','<<j<<"RMSD="<<RMSD<<endl;
 			AofHEAP[subscriptofA]=New_Data_for_HEAP(sigma_i,RMSD);
 		}
 	}
@@ -209,13 +209,24 @@ HEAP* BUILD_HEAP_FOR_PAIRS(const vector<double*> A, const vector<double*> B){
 }
 
 vector<int> Complement_of_Vector(vector<int> oneset, int allsetsize){
-	vector<int> flags(allsetsize,0);
+	vector<int> flags(allsetsize+1,0);
 	vector<int> complement;
-	for(int i=0; i<oneset.size(); i++) flags[i]=1;
+	for(int i:oneset) flags[i]=1;
 	for(int i=0; i<allsetsize; i++){
 		if(flags[i]==0) complement.push_back(i);
 	}
 	return complement;
+}
+
+void View_Contents_ofH(HEAP *H){
+	cout<<"H:"<<endl;
+	for (int i=1;i<=H->heap_size;i++){
+		cout<<H->A[i]->key<<" [";
+		for(int j=0; j<H->A[i]->taple.size(); j++){
+			cout<<H->A[i]->taple[j]<<",";
+		}
+		cout<<"]"<<endl;
+	}
 }
 
 data* Find_Maximizing_Permutation(const vector<double*> A, const vector<double*> B){
@@ -225,10 +236,14 @@ data* Find_Maximizing_Permutation(const vector<double*> A, const vector<double*>
 	vector<int>* new_taple;
 	double RMSD;
 	data* p;
+	int inte;
 	while(1){
+		View_Contents_ofH(H);
+		//cin>>inte;
 		maxinheap = EXTRACT_MAX(H);
 		cout<<maxinheap->taple.size()<<endl;
 		if(maxinheap->taple.size()==A.size()) return maxinheap;
+		cout<<"contetn"<<endl;
 		complement= Complement_of_Vector(maxinheap->taple,B.size());
 		for(int i:complement){
 			new_taple=new vector<int>; 
@@ -246,8 +261,8 @@ int main(){
 
 	vector<double*> A,B;
 	int n_a, n_b; //The number of the vectors of A, B
-	n_a=5;
-	n_b=5;
+	n_a=50;
+	n_b=50;
 	B=Init_Vectors_inB(n_b);
 	for(int i=0; i<n_b;i++)		cout<<B[i][0]<<","<<B[i][1]<<","<<B[i][2]<<endl;
 	vector<vector<double>> rotation=Create_Random_Rotation_Matrix();
@@ -263,6 +278,8 @@ int main(){
 
 	}*/
 	A=Init_Vectors_inA(B,rotation,permutation,n_a);
+	for(int i=0; i<n_b; i++)	cout<<permutation[i]<<endl;
+	cout<<"Minimized_RMSD"<<Minimize_RMSD(A,B,permutation)<<endl;
 	data* answer=Find_Maximizing_Permutation(A,B);
 	cout<<answer->key<<endl;
 	Close_Vectors(A);

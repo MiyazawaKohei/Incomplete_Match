@@ -12,38 +12,38 @@ using namespace std;
 
 void HEAPIFY(HEAP *H, int i)
 {
-  int l, r, largest, heap_size;
+  int l, r, smallest, heap_size;
   data *tmp, **A;
 
   A = H->A;  heap_size = H->heap_size;
 
   l = LEFT(i);   r = RIGHT(i);
-  if (l <= heap_size && A[l]->key > A[i]->key) largest = l; 
-  else  largest = i;                              
-  if (r <= heap_size && A[r]->key > A[largest]->key)        
-    largest = r;
-  if (largest != i) {                                                          
-    tmp = A[i];  A[i] = A[largest];  A[largest] = tmp; 
-    HEAPIFY(H, largest);
+  if (l <= heap_size && A[l]->key < A[i]->key) smallest = l; 
+  else  smallest = i;                              
+  if (r <= heap_size && A[r]->key < A[smallest]->key)        
+    smallest = r;
+  if (smallest != i) {                                                          
+    tmp = A[i];  A[i] = A[smallest];  A[smallest] = tmp; 
+    HEAPIFY(H, smallest);
   }
 }
 
 void HEAPIFY2(HEAP *H, int i)
 {
-  int l, r, largest, heap_size;
+  int l, r, smallest, heap_size;
   data *tmp, **A;
 
   A = H->A;  heap_size = H->heap_size;
 
   while (1) {
     l = LEFT(i);   r = RIGHT(i);
-    if (l <= heap_size && A[l]->key > A[i]->key) largest = l; 
-    else  largest = i;                              
-    if (r <= heap_size && A[r]->key > A[largest]->key)       
-      largest = r;
-    if (largest == i) break;
-    tmp = A[i];  A[i] = A[largest];  A[largest] = tmp; 
-    i = largest;
+    if (l <= heap_size && A[l]->key < A[i]->key) smallest = l; 
+    else  smallest = i;                              
+    if (r <= heap_size && A[r]->key < A[smallest]->key)       
+      smallest = r;
+    if (smallest == i) break;
+    tmp = A[i];  A[i] = A[smallest];  A[smallest] = tmp; 
+    i = smallest;
   }
 }
 
@@ -113,7 +113,7 @@ void INSERT(HEAP *H, data *node)  // O(lg n) ŽžŠÔ
 
   A = H->A;
   i = H->heap_size;
-  while (i > 1 && A[PARENT(i)]->key < node->key) {
+  while (i > 1 && A[PARENT(i)]->key > node->key) {
     A[i] = A[PARENT(i)];
     i = PARENT(i);
   }
