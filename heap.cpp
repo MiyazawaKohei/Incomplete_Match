@@ -118,7 +118,7 @@ void INSERT(HEAP *H, data *node)  // O(lg n) ŽžŠÔ
     i = PARENT(i);
   }
   A[i] = node;
-  cout<<"ed"<<endl;
+  //cout<<"ed"<<endl;
 }
 
 void DELETE(HEAP *H, int i)  // O(lg n) ŽžŠÔ
