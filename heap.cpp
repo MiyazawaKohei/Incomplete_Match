@@ -105,20 +105,20 @@ void INSERT(HEAP *H, data *node)  // O(lg n) ŽžŠÔ
 
   H->heap_size = H->heap_size + 1;
   if (H->heap_size > H->length) {
-    //printf("ERROR overflow\n");
+    printf("ERROR overflow\n");
     //exit(1);
     DOUBLE_HEAPSIZE(H);
+
   }
 
   A = H->A;
   i = H->heap_size;
-
-  cout<<node->key<<endl;
   while (i > 1 && A[PARENT(i)]->key < node->key) {
     A[i] = A[PARENT(i)];
     i = PARENT(i);
   }
   A[i] = node;
+  cout<<"ed"<<endl;
 }
 
 void DELETE(HEAP *H, int i)  // O(lg n) ŽžŠÔ

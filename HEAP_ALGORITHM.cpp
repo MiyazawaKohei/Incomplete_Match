@@ -145,17 +145,17 @@ Eigen::Matrix<double,3,3> Compute_BAt(const vector<double*> A,const vector<doubl
 			for(int k=0; k<A.size(); k++)		BAt(i,j)+=A[k][j]*B[k][i];
 		}
 	}
-	cout<<BAt<<endl;
+	//cout<<BAt<<endl;
 	return BAt;
 }
 
 double Maximize_trRBAt(const vector<double*> A,const vector<double*> B){
 	Eigen::Matrix<double,3,3> BAt=Compute_BAt(A,B);
 	Eigen::JacobiSVD<Eigen::Matrix<double,3,3>> svd(BAt, Eigen::ComputeFullU | Eigen::ComputeFullV);
-	cout<<"Its singular values are:" <<svd.singularValues()<<endl;
+	//cout<<"Its singular values are:" <<svd.singularValues()<<endl;
 	double nuclear_norm=0;
 	for(int i=0; i<3; i++)		nuclear_norm+=svd.singularValues()[i];
-	cout<<nuclear_norm<<endl;
+	//cout<<nuclear_norm<<endl;
 	return nuclear_norm;
 }
 
@@ -200,10 +200,11 @@ HEAP* BUILD_HEAP_FOR_PAIRS(const vector<double*> A, const vector<double*> B){
 			sigma_i[0] = i;
 			sigma_i[1] = j;
 			RMSD = Minimize_RMSD(A,B,sigma_i);
-			AofHEAP[subscriptofA]=New_Data_for_HEAP(sigma_i,RMSD);;
+			//cout<<i<<','<<j<<"RMSD="<<RMSD<<endl;
+			AofHEAP[subscriptofA]=New_Data_for_HEAP(sigma_i,RMSD);
 		}
 	}
-	BUILD_HEAP(H,subscriptofA,AofHEAP,subscriptofA);
+	BUILD_HEAP(H,subscriptofA,AofHEAP,subscriptofA+1);
 	return H;
 }
 
@@ -221,17 +222,22 @@ data* Find_Maximizing_Permutation(const vector<double*> A, const vector<double*>
 	HEAP* H=BUILD_HEAP_FOR_PAIRS(A,B);
 	data* maxinheap;
 	vector<int> complement;
-	vector<int> new_taple;
+	vector<int>* new_taple;
 	double RMSD;
+	data* p;
 	while(1){
 		maxinheap = EXTRACT_MAX(H);
+		cout<<maxinheap->taple.size()<<endl;
 		if(maxinheap->taple.size()==A.size()) return maxinheap;
 		complement= Complement_of_Vector(maxinheap->taple,B.size());
 		for(int i:complement){
-			copy(maxinheap->taple.begin(), maxinheap->taple.end(), back_inserter(new_taple) );
-			new_taple.push_back(i);
-			RMSD = Minimize_RMSD(A,B,new_taple);
-			INSERT(H,New_Data_for_HEAP(new_taple,RMSD));
+			new_taple=new vector<int>; 
+			copy(maxinheap->taple.begin(), maxinheap->taple.end(), back_inserter(*new_taple) );
+			(*new_taple).push_back(i);
+			RMSD = Minimize_RMSD(A,B,*new_taple);
+			p=New_Data_for_HEAP(*new_taple,RMSD);
+			cout<<p->key<<endl;
+			INSERT(H,p);
 		}
 	}
 }
