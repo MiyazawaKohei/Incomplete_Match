@@ -13,8 +13,8 @@ void HEAPIFY(HEAP *H, int i);
 void HEAPIFY2(HEAP *H, int i);
 void BUILD_HEAP(HEAP *H, int n, data **A, int length);
 void HEAPSORT(int n, data **A);
-data* EXTRACT_MAX(HEAP *H) ;
+data* EXTRACT_MIN(HEAP *H) ;
 void DOUBLE_HEAPSIZE(HEAP *H);
 void INSERT(HEAP *H, data *node) ;
 void DELETE(HEAP *H, int i);
-
+void DESTRACT_HEAP(HEAP *H);

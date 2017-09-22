@@ -44,8 +44,6 @@ vector<double> Create_Random_Normarized_Vector(){
 	Normarized_Vector.push_back(cos(theta)*cos(phi));
 	Normarized_Vector.push_back(cos(theta)*sin(phi));
 	Normarized_Vector.push_back(sin(theta));
-	//for(int i=0; i<3;i++)	cout<<Normarized_Vector[i];
-	//cout <<endl;
 	return Normarized_Vector;
 }
 
@@ -78,7 +76,6 @@ vector<vector<double>> Create_Random_Rotation_Matrix(){
 			innerproduct=Inner_Product(vectors[i],vectors[j]);
 			for(int k=0; k<vectors[i].size(); k++) vectors[i][k]-=vectors[j][k]*innerproduct;	
 		}
-		cout<<vectors[i][0]<<vectors[i][1]<<vectors[i][2]<<endl;
 		vectors[i]=Normarize_Vector(vectors[i]);
 		cout<<vectors[i][0]<<vectors[i][1]<<vectors[i][2]<<endl;
 	}	
@@ -97,29 +94,29 @@ vector<int> Create_Random_Permutaiton(int n_b){
 	vector<int> permutation;
 	for(int i=0; i<n_b; i++)	permutation.push_back(i);
 	random_shuffle(permutation.begin(),permutation.end(),MyRandom_Int);
+	cout<<"permutation:"<<endl;
 	for(int i=0; i<n_b; i++)	cout<<permutation[i]<<' ';
 	cout<<endl;
 	return permutation;
 }
 
-vector<double*> Init_Vectors_inA(vector<double*> B,vector<vector<double>> rotation, vector<int> permutation,int n_a){
+vector<double*> Init_Vectors_inA(vector<double*> B,vector<vector<double>> rotation, vector<int> permutation,int n_a, double SDofnoise){
 	vector<double*> A;
 	uniform_real_distribution<double> coordinate(0,1.0);
-	normal_distribution<double> noise(0, 0.02);
+	normal_distribution<double> noise(0, SDofnoise);
 	random_device rd;
 	std::mt19937 mt(rd());
 	double coordinates[dimention];
 	for(int i=0; i<dimention; i++) coordinates[i]=coordinate(mt);
+	cout<<"A:"<<endl;
 	for (int i=0; i<n_a; i++){
 		A.push_back(new double [dimention]);
 		for(int j=0; j<dimention; j++){
 			A.back()[j]=coordinates[j]+noise(mt);			
-
 			for(int k=0; k<dimention; k++){
 				A.back()[j]+=rotation[k][j]*B[permutation[i]][k];
-				cout<<rotation[k][j]<<B[permutation[i]][k]<<endl;
 			}
-			cout<<A.back()[j]<<endl;
+			cout<<A.back()[j]<<',';
 		}
 		cout<<endl;
 	}
@@ -146,17 +143,14 @@ Eigen::Matrix<double,3,3> Compute_BAt(const vector<double*> A,const vector<doubl
 			for(int k=0; k<A.size(); k++)		BAt(i,j)+=A[k][j]*B[k][i];
 		}
 	}
-	//cout<<BAt<<endl;
 	return BAt;
 }
 
 double Maximize_trRBAt(const vector<double*> A,const vector<double*> B){
 	Eigen::Matrix<double,3,3> BAt=Compute_BAt(A,B);
 	Eigen::JacobiSVD<Eigen::Matrix<double,3,3>> svd(BAt, Eigen::ComputeFullU | Eigen::ComputeFullV);
-	//cout<<"Its singular values are:" <<svd.singularValues()<<endl;
 	double nuclear_norm=0;
 	for(int i=0; i<3; i++)		nuclear_norm+=svd.singularValues()[i];
-	//cout<<nuclear_norm<<endl;
 	return nuclear_norm;
 }
 
@@ -176,7 +170,9 @@ double Minimize_RMSD(const vector<double*> A,const vector<double*> B, const vect
 		for(int j=0; j<dimention; j++) RMSD+=subA[i][j]*subA[i][j]+subB[i][j]*subB[i][j];
 	}
 	RMSD-=2*Maximize_trRBAt(subA,subB);
-	//cout<<"RMSD="<<RMSD<<endl;
+	Close_Vectors(subA);
+	Close_Vectors(subB);
+
 	return RMSD;
 }
 
@@ -201,7 +197,6 @@ HEAP* BUILD_HEAP_FOR_PAIRS(const vector<double*> A, const vector<double*> B){
 			sigma_i[0] = i;
 			sigma_i[1] = j;
 			RMSD = Minimize_RMSD(A,B,sigma_i);
-			//cout<<i<<','<<j<<"RMSD="<<RMSD<<endl;
 			AofHEAP[subscriptofA]=New_Data_for_HEAP(sigma_i,RMSD);
 		}
 	}
@@ -230,7 +225,7 @@ void View_Contents_ofH(HEAP *H){
 	}
 }
 
-data* Find_Maximizing_Permutation(const vector<double*> A, const vector<double*> B){
+void Find_Minimizing_Permutation(const vector<double*> A, const vector<double*> B){
 	HEAP* H=BUILD_HEAP_FOR_PAIRS(A,B);
 	data* maxinheap;
 	vector<int> complement;
@@ -240,14 +235,13 @@ data* Find_Maximizing_Permutation(const vector<double*> A, const vector<double*>
 	int inte;
 	while(1){
 		//View_Contents_ofH(H);
-		//cin>>inte;
-		maxinheap = EXTRACT_MAX(H);
-		//cout<<maxinheap->taple.size()<<endl;
+		maxinheap = EXTRACT_MIN(H);
 		if(maxinheap->taple.size()==A.size()){
 			cout<<H->heap_size<<endl;
-			return maxinheap;
+			cout<<maxinheap->key<<endl;
+			DESTRACT_HEAP(H);
+			return;
 		}
-		//cout<<"contetn"<<endl;
 		complement= Complement_of_Vector(maxinheap->taple,B.size());
 		for(int i:complement){
 			new_taple=new vector<int>; 
@@ -255,7 +249,6 @@ data* Find_Maximizing_Permutation(const vector<double*> A, const vector<double*>
 			(*new_taple).push_back(i);
 			RMSD = Minimize_RMSD(A,B,*new_taple);
 			p=New_Data_for_HEAP(*new_taple,RMSD);
-			//cout<<p->key<<endl;
 			INSERT(H,p);
 		}
 	}
@@ -267,27 +260,18 @@ int main(){
 	int n_a, n_b; //The number of the vectors of A, B
 	n_a=5;
 	n_b=100;
+	double SDofnoise=0.0001;
 	B=Init_Vectors_inB(n_b);
+	cout<<"B:"<<endl;
 	for(int i=0; i<n_b;i++)		cout<<B[i][0]<<","<<B[i][1]<<","<<B[i][2]<<endl;
 	vector<vector<double>> rotation=Create_Random_Rotation_Matrix();
 	vector<int> permutation=Create_Random_Permutaiton(n_b);
 	
-	/*for(int i=0; i<n_b; i++)	permutation[i]=i;
-	for(int i=0; i<3; i++){
-		for(int j=0; j<3; j++){
-			rotation[i][j]=(i==j?1:0);
-			cout<<rotation[i][j];
-		}
-		cout<<endl;
-
-	}*/
-	A=Init_Vectors_inA(B,rotation,permutation,n_a);
-	for(int i=0; i<n_b; i++)	cout<<permutation[i]<<endl;
+	A=Init_Vectors_inA(B,rotation,permutation,n_a,SDofnoise);
 	vector<int> permutationcut(n_a,0);
 	for(int i=0; i<n_a; i++) permutationcut[i]=permutation[i];
-	cout<<"Minimized_RMSD"<<Minimize_RMSD(A,B,permutationcut)<<endl;
-	data* answer=Find_Maximizing_Permutation(A,B);
-	cout<<answer->key<<endl;
+	cout<<"Minimized_RMSD:"<<Minimize_RMSD(A,B,permutationcut)<<endl;
+	Find_Minimizing_Permutation(A,B);
 	Close_Vectors(A);
 	Close_Vectors(B);
 }

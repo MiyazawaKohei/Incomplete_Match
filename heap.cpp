@@ -72,7 +72,7 @@ void HEAPSORT(int n, data **A)
   }
 }
 
-data* EXTRACT_MAX(HEAP *H)  // O(lg n) time
+data* EXTRACT_MIN(HEAP *H)  // O(lg n) time
 {
   data *MAX, **A;
 
@@ -93,19 +93,26 @@ void DOUBLE_HEAPSIZE(HEAP *H){
   H -> length *= 2;
   data **newA = new data*[H->length];
   for(int i=1; i< H -> heap_size; i++) newA[i]=H->A[i];
-  //delete[] H->A;
+  delete H->A;
   H->A=newA;
   return;
 }
 
-void INSERT(HEAP *H, data *node)  // O(lg n) ŽžŠÔ
-{
+void DESTRACT_HEAP(HEAP *H){
+  for(int i=0; i<= H -> heap_size; i++){
+    delete H->A[i];
+  }
+  delete H->A;
+  delete H;
+}
+
+void INSERT(HEAP *H, data *node) {
   int i;
   data **A;
 
   H->heap_size = H->heap_size + 1;
   if (H->heap_size > H->length) {
-    printf("ERROR overflow\n");
+    //printf("ERROR overflow\n");
     //exit(1);
     DOUBLE_HEAPSIZE(H);
 
@@ -118,10 +125,9 @@ void INSERT(HEAP *H, data *node)  // O(lg n) ŽžŠÔ
     i = PARENT(i);
   }
   A[i] = node;
-  //cout<<"ed"<<endl;
 }
 
-void DELETE(HEAP *H, int i)  // O(lg n) ŽžŠÔ
+void DELETE(HEAP *H, int i)  
 {
   data **A;
 
