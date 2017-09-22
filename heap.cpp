@@ -2,22 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include "heap.h"
 using namespace std;
 
-struct data{
-  vector<int> taple;
-  double key;
-};
 
 #define LEFT(i) (2*i)
 #define RIGHT(i) (2*(i)+1)
 #define PARENT(i) (i/2)
-
-struct HEAP{
-  unsigned int length;
-  unsigned int heap_size;
-  data **A;
-};
 
 void HEAPIFY(HEAP *H, int i)
 {
@@ -62,7 +53,7 @@ void BUILD_HEAP(HEAP *H, int n, data **A, int length)
   H->length = length;
   H->heap_size = n;
   H->A = A;
-  for (i = H->length/2; i >= 1; i--) {
+  for (i = H->heap_size/2; i >= 1; i--) {
     HEAPIFY(H,i);
   }
 }
@@ -150,6 +141,7 @@ void DELETE(HEAP *H, int i)  // O(lg n) ŽžŠÔ
   HEAPIFY(H,1);
 }
 
+/*
 int main()
 {
   data *A[20];
@@ -159,13 +151,14 @@ int main()
   }
   HEAP H;
   int i,n;
-  BUILD_HEAP(&H,4,A,4);
+  BUILD_HEAP(&H,4,A,8);
   INSERT(&H,A[18]);
+  DELETE(&H,2);
   n = H.heap_size+1;
-  /*for (i=1; i<=n; i++) {
+  for (i=1; i<=n; i++) {
     printf("max = %f\n",EXTRACT_MAX(&H)->key);
     for (i=1;i<=H.heap_size;i++) printf("%f ",A[i]->key);
     printf("\n");
-  }*/
+  }
 
-}
+}*/

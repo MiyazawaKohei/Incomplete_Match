@@ -7,6 +7,7 @@
 #include "Eigen/SVD"
 #include <algorithm>
 #include <functional>
+#include "heap.h"
 static const int dimention = 3;
 using namespace std;
 
@@ -178,6 +179,40 @@ double Minimize_RMSD(const vector<double*> A,const vector<double*> B, const vect
 	return RMSD;
 }
 
+HEAP* BUILD_HEAP_FOR_PAIRS(const vector<double*> A, const vector<double*> B){
+	vector<int> sigma_i(2,0);
+	double RMSD;
+	HEAP *H = new HEAP;
+	data **AofHEAP=new data*[B.size()*B.size()];
+	data *p;
+	int subscriptofA=0;
+	for(int i=0; i<B.size(); i++){
+		for(int j=0; j<B.size(); j++){
+			if(i==j) continue;
+			subscriptofA++;
+			sigma_i[0] = i;
+			sigma_i[1] = j;
+			RMSD = Minimize_RMSD(A,B,sigma_i);
+			p = new data;
+			p -> taple=sigma_i;
+			p -> key = RMSD;
+			AofHEAP[subscriptofA]=p;
+		}
+	}
+	BUILD_HEAP(H,subscriptofA,AofHEAP,subscriptofA);
+	return H;
+}
+
+/*
+data* Find_Maximizing_Permutation(const vector<double*> A, const vector<double*> B){
+	HEAP* H=BUILD_HEAP_FOR_PAIRS(A,B);
+	data* maxinheap;
+	while(1){
+		maxinheap = EXTRACT_MAX(H);
+
+	}
+}*/
+
 int main(){
 
 	vector<double*> A,B;
@@ -199,8 +234,7 @@ int main(){
 
 	}*/
 	A=Init_Vectors_inA(B,rotation,permutation,n_a);
-	
-	Minimize_RMSD(A,B,permutation);
+	HEAP* H=BUILD_HEAP_FOR_PAIRS(A,B);
 	Close_Vectors(A);
 	Close_Vectors(B);
 }
